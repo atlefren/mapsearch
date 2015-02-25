@@ -1,0 +1,19 @@
+{
+  "name": "mapsearch",
+  "version": "0.0.0",
+  "authors": [
+    "Atle Frenvik Sveen <atle@frenviksveen.net>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react-autocomplete": "~1.0.0",
+    "react-map": "~1.0.0"
+  }
+}

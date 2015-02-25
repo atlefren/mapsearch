@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" media="all" href="bower_components/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" type="text/css" media="all" href="bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" media="all" href="bower_components/react-autocomplete/dist/react-auocomplete.min.css"/>
+    <style type="text/css">
+
+        .map {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        .search {
+            position: absolute;
+            left: 50px;
+            top: 10px;  
+            width: 300px;
+            z-index: 2000;
+        }
+
+    </style>
+</head>
+<body>
+<div id="wrapper"></div>
+
+<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="bower_components/leaflet/dist/leaflet.js"></script>
+<script type="text/javascript" src="bower_components/underscore/underscore-min.js"></script>
+<script type="text/javascript" src="bower_components/react/react.js"></script>
+<script type="text/javascript" src="bower_components/react/JSXTransformer.js"></script>
+<script type="text/javascript" src="bower_components/react-autocomplete/dist/react-autocomplete.js"></script>
+<script type="text/javascript" src="bower_components/react-map/dist/react-map.js"></script>
+
+<script type="text/jsx">
+
+    var SSRSearcher = function () {
+
+        function search(value, callback) {
+
+            function success(result) {
+                callback(_.map(result.stedsnavn, function (a) {
+                    a.id = a.ssrId;
+                    return a;
+                }));
+            }
+            $.ajax({
+                url: 'https://ws.geonorge.no/SKWS3Index/ssr/sok',
+                data: {
+                    navn: value,
+                    antPerSide: 9,
+                    epsgKode: '4258',
+                    eksakteForst: 'true',
+                    side: 0
+                },
+                type: 'GET',
+                dataType: 'json',
+                success: success,
+            });
+        }
+
+        return {
+            search: search
+        };
+    }
+
+    var searcher = new SSRSearcher();
+
+    var MapSearch = React.createClass({
+
+        itemSelected: function (item) {
+
+        },
+
+        search: function (query, callback) {
+            searcher.search(query.query, callback);
+        },
+
+        render: function () {
+            return (
+                <div>
+                    <div className="search">
+                        <Autocomplete
+                        placeholder="Søk.."
+                        select={this.itemSelected}
+                        displayAttribute='stedsnavn'
+                        autocompleteSearch={this.search}/>
+                    </div>
+                    <Map lat="65.0" lon="10.0" zoom="5"/>        
+                </div>
+            );
+        }
+    })
+
+      React.render(
+        <MapSearch />,
+        document.getElementById('wrapper')
+      );
+    </script>
+
+</body>
+</html>
