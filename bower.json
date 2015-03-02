@@ -14,6 +14,6 @@
   ],
   "dependencies": {
     "react-autocomplete": "~1.0.0",
-    "react-map": "~1.0.0"
+    "react-map": "~1.0.2"
   }
 }

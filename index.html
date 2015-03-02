@@ -44,9 +44,20 @@
         function search(value, callback) {
 
             function success(result) {
-                callback(_.map(result.stedsnavn, function (a) {
-                    a.id = a.ssrId;
-                    return a;
+
+                if (parseInt(result.totaltAntallTreff, 10) === 1) {
+                    result.stedsnavn = [result.stedsnavn];
+                }
+
+                var template = _.template('<%= stedsnavn %>, <%= fylkesnavn %> (<%= navnetype %>)');
+                callback(_.map(result.stedsnavn, function (place, idx) {
+                    var data = {
+                        id: idx,
+                        name: function () {
+                            return template(place);
+                        }
+                    }
+                    return _.extend(data, place);
                 }));
             }
             $.ajax({
@@ -74,11 +85,26 @@
     var MapSearch = React.createClass({
 
         itemSelected: function (item) {
-
+            var pos = [parseFloat(item.nord), parseFloat(item.aust)];
+            var marker = L.marker(pos);
+            this.layerGroup.clearLayers();
+            this.layerGroup.addLayer(marker);
+            this.map.panTo(pos);
         },
 
         search: function (query, callback) {
             searcher.search(query.query, callback);
+        },
+
+        createMap: function (element) {
+            this.map = L.map(element);
+            L.tileLayer(
+                'http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=norges_grunnkart&zoom={z}&x={x}&y={y}', {
+                attribution: "&copy; <a href='http://statkart.no'>Kartverket</a>"
+            }).addTo(this.map);
+
+            this.layerGroup = L.layerGroup([]).addTo(this.map);
+            return this.map;
         },
 
         render: function () {
@@ -88,14 +114,18 @@
                         <Autocomplete
                         placeholder="Søk.."
                         select={this.itemSelected}
-                        displayAttribute='stedsnavn'
+                        displayAttribute='name'
                         autocompleteSearch={this.search}/>
                     </div>
-                    <Map lat="65.0" lon="10.0" zoom="5"/>        
+                    <Map 
+                        createMap={this.createMap}
+                        lat="65.0"
+                        lon="10.0"
+                        zoom="5"/>
                 </div>
             );
         }
-    })
+    });
 
       React.render(
         <MapSearch />,
